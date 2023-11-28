@@ -7,6 +7,13 @@
 
 #include "HX711.h"
 #include <M5StickCPlus.h>
+#include <vector>
+#include <numeric>
+
+using namespace std;
+
+vector<double> offsets;
+vector<double> scales;
 
 HX711 myScale;
 
@@ -31,9 +38,27 @@ void setup()
 
 void loop()
 {
+  M5.update();
   calibrate();
+  findAverageOffsetAndScale();
 }
 
+void findAverageOffsetAndScale() {
+  
+  double offsetsSum = accumulate(offsets.begin(), offsets.end(), 0);
+
+  double finalOffset = static_cast<double>(offsetsSum) / offsets.size();
+
+  double scalesSum = accumulate(scales.begin(), scales.end(), 0);
+
+  double finalScale = static_cast<double>(scalesSum) / offsets.size();
+
+  M5.Lcd.print("Offset: ");
+  M5.Lcd.print(finalOffset);
+  M5.Lcd.print(" | Scale: ");
+  M5.Lcd.print(finalScale);
+  M5.Lcd.println();
+}
 
 
 void calibrate()
@@ -53,6 +78,8 @@ void calibrate()
   Serial.print("OFFSET: ");
   Serial.println(offset);
   Serial.println();
+
+  offsets.push_back(offset);
 
 
   Serial.println("place a weight on the loadcell");
@@ -80,6 +107,8 @@ void calibrate()
 
   Serial.print("SCALE:  ");
   Serial.println(scale, 6);
+
+  scales.push_back(scale);
 
   Serial.print("\nuse scale.set_offset(");
   Serial.print(offset);

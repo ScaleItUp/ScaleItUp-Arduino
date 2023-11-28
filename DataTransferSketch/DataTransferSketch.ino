@@ -13,8 +13,8 @@ HX711 scale;
 const int LOADCELL_DOUT_PIN = 33;
 const int LOADCELL_SCK_PIN = 32;
 
-const long current_offset = 4294704982;
-const float current_scale = 23.3;
+const long current_offset = 4294698768;
+const float current_scale = 25.61;
 
 vector<double> weights;
 
@@ -46,9 +46,8 @@ void loop() {
     }
 
     if (M5.BtnB.wasPressed()) {
-      // Action to be performed when button B is pressed
-      // Replace this with your desired action
-      M5.Lcd.println("Button B Pressed!");
+      weights.clear();
+      Serial.println("Weights are reset!");
     }
   } else {
     Serial.println("HX711 not found.");
@@ -66,10 +65,10 @@ void setupScale() {
   scale.set_offset(current_offset);
   scale.set_scale(current_scale);
   
-  M5.Lcd.println("Scale Setup Complete!");
-  M5.Lcd.println();
-  M5.Lcd.println("Scale is ready for use. Place your weight!");
-  M5.Lcd.println();
+  Serial.println("Scale Setup Complete!");
+  Serial.println();
+  Serial.println("Scale is ready for use. Place your weight!");
+  Serial.println();
 }
 
 void captureWeights() {
@@ -100,8 +99,8 @@ void setupWiFi() {
   // adding delay for wifi to connect
   delay(2000);
 
-  M5.Lcd.println("Connected to WiFi");
-  M5.Lcd.println();
+  Serial.println("Connected to WiFi");
+  Serial.println();
 }
 
 void sendDataToServer(double weight) {
@@ -109,9 +108,9 @@ void sendDataToServer(double weight) {
   // Prepare JSON data for the POST request
   String jsonPayload = "{\"weight\":" + String(weight, 2) + "}";
 
-  M5.Lcd.print("Sending weight to server!! -> ");
-  M5.Lcd.println(weight, 2);
-  M5.Lcd.println();
+  Serial.print("Sending weight to server!! -> ");
+  Serial.println(weight, 2);
+  Serial.println();
 
   setupWiFi();
 
@@ -123,16 +122,16 @@ void sendDataToServer(double weight) {
   // Send the POST request with the JSON payload
   int httpCode = http.POST(jsonPayload);
 
-  M5.Lcd.println(httpCode);
+  Serial.println(httpCode);
 
   if (httpCode == 201) {
     String payload = http.getString();
-    M5.Lcd.println("HTTP Response:");
-    M5.Lcd.println(payload);
-    M5.Lcd.println();
+    Serial.println("HTTP Response:");
+    Serial.println(payload);
+    Serial.println();
   } else {
-    M5.Lcd.println("HTTP request failed");
-    M5.Lcd.println();
+    Serial.println("HTTP request failed");
+    Serial.println();
   }
 
   http.end();
